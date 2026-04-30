@@ -18,6 +18,9 @@ server.use(express.json())
 // use routes in server
 server.use(routes)
 
+//handling static file/folder
+server.use('/uploads',express.static('./uploads'))
+
 // SETUP a port number TO RUN SERVER IN INTERNET 
 const PORT = process.env.PORT
 

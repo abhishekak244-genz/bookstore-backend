@@ -50,16 +50,19 @@ exports.loginController = async (req,res)=>{
 // google login
 exports.googleLoginController = async (req, res) => {
   console.log("Inside GoogleLogin");
-  const { email, password, username, picture } = req.body;
 
+  const { email, password, username, picture } = req.body;
+ //check email in db
   const existingUser = await users.findOne({ email });
   if (existingUser) {
+    //if present, check password
     const token = jwt.sign(
       { userMail: existingUser.email, role: existingUser.role },
       process.env.JWTSECRET,
     );
     res.status(200).json({ user: existingUser, token });
   } else {
+     //if not present ,
     let encrypPassword = await bcrypt.hash(password, 10);
     const newUser = await users.create({
       username,
@@ -76,11 +79,19 @@ exports.googleLoginController = async (req, res) => {
 };
 
 //user edit
-exports.userEditController = async(req,res)=>{
-console.log("inside user userEditController");
-console.log(req.body);
-res.status(200).json("recieved userEdit request")
-
+exports.userEditController = async (req,res)=>{
+    console.log("Inside userEditController");
+    const {id} = req.params
+    const email = req.payload
+    const{username,password,bio,picture,role} = req.body
+    const encryptedPassWord = await bcrypt.hash(password,10)
+    const updatePicture = req.file?req.file.filename:picture
+    const updateUser = await users.findByIdAndUpdate({_id:id},{
+        username,email,password:encryptedPassWord,picture:updatePicture,bio,role
+    },{new:true})
+    
+    res.status(200).json(updateUser)
+    
 }
 
 //admin edit
